@@ -27,7 +27,6 @@ const uint8_t limit_switch1 {3};
 // Stepper pins
 const uint8_t spin0 {4};
 const uint8_t spin1 {5};
-const uint8_t spin2 {6};
 
 // EEPROM position address
 int EEPROM_pos_addr {0};
@@ -42,7 +41,7 @@ LimitSwitch ls0(limit_switch0);
 LimitSwitch ls1(limit_switch1);
 
 // Stepper
-AccelStepper stepper(spin0, spin1, spin2);
+AccelStepper stepper(1, spin0, spin1);
 
 // Ethernet
 Eth eth0;
@@ -52,7 +51,7 @@ bool local_client_connected = false;
 void update_stepper(int pos) {
     /* Increment stepper position for event loop */
     stepper.moveTo(pos); // moveTo will set target to an absolute position, runs at the last set speed
-    if (stepper.distanceToGo() > 0) {
+    if (abs(stepper.distanceToGo()) > 0) {
         stepper.run();
         Serial.println(stepper.currentPosition());
     } else {
@@ -66,6 +65,14 @@ void update_stepper(int pos) {
 void calibrate_stepper() {
     /* Zeros stepper position to limit_switch0 */
 
+}
+
+void setup_stepper() {
+    // Stepper setup
+    stepper.setMaxSpeed(5000);
+    stepper.setAcceleration(1000);
+    stepper.disableOutputs(); // re-enable pins with enableOutputs();
+    stepper.setCurrentPosition(0); // to be used in calibration step. Store last position in eeprom?
 }
 
 
@@ -85,11 +92,7 @@ void setup() {
     eth0.begin_server();
     eth0.connect_local_client();
 
-    // Stepper setup
-    stepper.setMaxSpeed(5000);
-    stepper.setAcceleration(1000);
-    stepper.disableOutputs(); // re-enable pins with enableOutputs();
-    stepper.setCurrentPosition(0); // to be used in calibration step. Store last position in eeprom?
+    setup_stepper();
 }
 
 
@@ -108,7 +111,7 @@ void loop() {
 
     // Send position data from the local client
     if (local_client_connected) {
-        eth0.send_data(3.1415926); // update to stepper position/velocity later
+        eth0.send_data(stepper.currentPosition()); // update to stepper position/velocity later
     }
 
     
@@ -119,7 +122,7 @@ void loop() {
         Serial.println(eth0.receivedChars);
 #endif // DEBUG
 
-        stepper_target = atof(eth0.receivedChars);
+        stepper_target = atol(eth0.receivedChars); // might need to change to atol if sending velocities?
 #if DEBUG
         Serial.print(F("stepper_target: "));
         Serial.println(stepper_target, 5);
@@ -149,6 +152,6 @@ void loop() {
     }
 
     /* Stepper */
-    // update_stepper(stepper_target); // Custom stepper class, holds target position and always tries to move there?
+    update_stepper(stepper_target); // Custom stepper class, holds target position and always tries to move there?
     
 }
