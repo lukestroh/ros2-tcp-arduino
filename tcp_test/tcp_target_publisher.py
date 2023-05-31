@@ -33,9 +33,9 @@ class TCPTargetPublisher(Node):
         # Construct ROS msg, publish
         msg = Float32()
 
-        self.target = 10000
+        self.target = 10000.0
         
-        msg.data = self.i
+        msg.data = self.target
         self.pub.publish(msg)
 
         # log the info
