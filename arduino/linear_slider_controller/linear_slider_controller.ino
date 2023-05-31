@@ -11,8 +11,9 @@
  * 
  * 
  */
-
+#ifndef DEBUG
 #define DEBUG 0
+#endif
 
 #include "limitswitch.h"
 #include "EthTCP.h"
@@ -83,9 +84,10 @@ void setup_stepper() {
 ********************************************/
 
 void setup() {
+#if DEBUG
     Serial.begin(115200);
     while (!Serial){;}
-
+#endif // DEBUG
 
     // Ethernet connections
     eth0.begin_ethernet();

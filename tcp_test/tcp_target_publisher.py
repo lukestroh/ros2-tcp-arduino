@@ -26,16 +26,14 @@ class TCPTargetPublisher(Node):
         self.pub_socket.connect((ARDUINO_HOST, ARDUINO_PORT))
 
 
-        self.i = 0
+        self.target = 0
         return
     
     def timer_callback(self):
         # Construct ROS msg, publish
         msg = Float32()
 
-        self.i+= 1.0
-        if self.i > 10:
-            self.i=0.0
+        self.target = 10000
         
         msg.data = self.i
         self.pub.publish(msg)

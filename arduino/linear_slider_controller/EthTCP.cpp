@@ -6,6 +6,7 @@
 
 #include "EthTCP.h"
 
+
 Eth::Eth():
     /* Initialize class variables */
     lan_server_ip(169, 254, 93, 234),
@@ -25,6 +26,7 @@ void Eth::begin_ethernet() {
     */
     Ethernet.begin(MAC, IP, DNS, GATEWAY, SUBNET);
 
+#if DEBUG
     // Check for hardware errors
     if (static_cast<int>(Ethernet.hardwareStatus()) == static_cast<int>(EthernetNoHardware)) {
         Serial.println(F("ERROR: Ethernet shield was not found."));
@@ -33,6 +35,7 @@ void Eth::begin_ethernet() {
     if (static_cast<int>(Ethernet.hardwareStatus()) == static_cast<int>(LinkOFF)) {
         Serial.println(F("ERROR: Ethernet cable is not connected."));
     }
+
 
     Serial.println(F("Network information:"));
     Serial.print(F("IPv4 Address: "));
@@ -43,6 +46,7 @@ void Eth::begin_ethernet() {
     Serial.println(Ethernet.subnetMask());
     Serial.print(F("DNS Server: "));
     Serial.println(Ethernet.dnsServerIP());
+#endif // DEBUG
 }
 
 
@@ -52,12 +56,17 @@ void Eth::begin_server() {
 
 bool Eth::connect_local_client() {
     if (!local_client.connected()) {
+
         if (local_client.connect(lan_server_ip, lan_server_port) == 1) {
+#if DEBUG
             Serial.println(F("Connected to host.\n"));
+#endif // DEBUG
         }
+#if DEBUG
         else {
             Serial.println(F("Connection to host failed.\n"));
         }
+#endif // DEBUG
     }
 
     // `maintain()` must be frequently called to maintain DHCP lease for the given IP address
@@ -74,10 +83,10 @@ bool Eth::connect_local_client() {
 void Eth::accept_clients() {
     /* Add new clients to client list */
     EthernetClient new_client = local_server.accept();
-    #if DEBUG
+#if DEBUG
         Serial.print(F("Got new client: "));
         Serial.println(new_client);
-    #endif // DEBUG
+#endif // DEBUG
     if (new_client) {
         for (uint8_t i=0; i<num_clients; ++i) {
             if (!lan_clients[i]) {

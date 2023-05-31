@@ -15,6 +15,10 @@
 #ifndef ETHTCP_H
 #define ETHTCP_H
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 #include <stdint.h>
 #include <Ethernet.h>
 #include <Arduino.h>
