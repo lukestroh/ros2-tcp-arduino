@@ -13,7 +13,7 @@ SERVER_PORT = 11412
 class TCPPosPublisher(Node):
     def __init__(self) -> None:
         super().__init__(node_name='tcp_pos_publisher')
-        self.sub: rclpy.subscriber.Subscriber = self.create_publisher(
+        self.sub: rclpy.publisher.Publisher = self.create_publisher(
             msg_type=Float32,
             topic='linear_slider_pos',
             qos_profile=10
@@ -51,11 +51,11 @@ class TCPPosPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    tcp_subscriber = TCPPosPublisher()
+    tcp_publisher = TCPPosPublisher()
 
-    rclpy.spin(tcp_subscriber)
+    rclpy.spin(tcp_publisher)
 
-    tcp_subscriber.sub_socket.close()
+    tcp_publisher.sub_socket.close()
 
     return
 
