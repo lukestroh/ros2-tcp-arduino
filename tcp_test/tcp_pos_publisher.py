@@ -13,7 +13,7 @@ SERVER_PORT = 11412
 class TCPPosPublisher(Node):
     def __init__(self) -> None:
         super().__init__(node_name='tcp_pos_publisher')
-        self.sub: rclpy.publisher.Publisher = self.create_publisher(
+        self.pub: rclpy.publisher.Publisher = self.create_publisher(
             msg_type=Float32,
             topic='linear_slider_pos',
             qos_profile=10
@@ -24,11 +24,11 @@ class TCPPosPublisher(Node):
         self.timer: rclpy.timer.Rate = self.create_timer(timer_period_sec=timer_period, callback=self.timer_callback)
 
         # Socket server
-        self.sub_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.pub_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
-        self.sub_socket.bind((SERVER_HOST, SERVER_PORT))
-        self.sub_socket.listen(2)
-        self.conn, self.addr = self.sub_socket.accept()
+        self.pub_socket.bind((SERVER_HOST, SERVER_PORT))
+        self.pub_socket.listen(2)
+        self.conn, self.addr = self.pub_socket.accept()
         if self.conn:
             self.get_logger().info(f"Listening on {self.addr}")
             self.socketstreamer = SocketStreamReader(self.conn)
@@ -55,7 +55,7 @@ def main(args=None):
 
     rclpy.spin(tcp_publisher)
 
-    tcp_publisher.sub_socket.close()
+    tcp_publisher.pub_socket.close()
 
     return
 
